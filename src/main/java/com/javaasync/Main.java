@@ -13,9 +13,12 @@ public class Main {
         CompletableFuture<String> completableFuture = new CompletableFuture<>();
 
         Executors.newCachedThreadPool().submit(() -> {
-            Thread.sleep(5000);
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             completableFuture.complete("Hello");
-            return null;
         });
 
         return completableFuture;
@@ -26,9 +29,12 @@ public class Main {
         CompletableFuture<String> completableFuture = new CompletableFuture<>();
 
         Executors.newCachedThreadPool().submit(() -> {
-            Thread.sleep(7000);
+            try {
+                Thread.sleep(7000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             completableFuture.complete("message");
-            return null;
         });
 
         return completableFuture;
