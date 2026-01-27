@@ -9,6 +9,13 @@ import java.util.concurrent.Future;
 
 public class Main {
 
+    public static CompletableFuture<Integer> responseSupplyAsync(){
+        int value = 10;
+        return CompletableFuture.supplyAsync(() -> value)
+                .thenApplyAsync(result -> result * 2)
+                .thenApplyAsync(result -> result + 5);
+    }
+
     public static Future<String> responseAsync() throws InterruptedException {
         CompletableFuture<String> completableFuture = new CompletableFuture<>();
 
@@ -44,16 +51,22 @@ public class Main {
 
         Future<String> responseAsyncFuture = responseAsync();
         Future<String> messageAsyncFuture = messageAsync();
+        CompletableFuture<Integer> messageSupplyAsyncFuture = responseSupplyAsync();
 
         CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(
-                (CompletableFuture<?>) responseAsyncFuture, (CompletableFuture<?>) messageAsyncFuture);
+                (CompletableFuture<?>) responseAsyncFuture, 
+                (CompletableFuture<?>) messageAsyncFuture,
+                messageSupplyAsyncFuture);
 
-        CompletableFuture<List<String>> allResults = combinedFuture.thenApply(v ->
-                Arrays.asList(((CompletableFuture<String>) responseAsyncFuture).join(), ((CompletableFuture<String>) messageAsyncFuture).join())
+        CompletableFuture<List<Object>> allResults = combinedFuture.thenApply(v ->
+                Arrays.asList(
+                        ((CompletableFuture<String>) responseAsyncFuture).join(),
+                        ((CompletableFuture<String>) messageAsyncFuture).join(),
+                        messageSupplyAsyncFuture.join())
         );
 
         try {
-            List<String> results = allResults.get();
+            List<Object> results = allResults.get();
             System.out.println(results);
         } catch (Exception e) {
             e.printStackTrace();
